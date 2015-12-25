@@ -1,0 +1,9 @@
+node_modules/*
+coverage/*
+
+*.log
+
+dist/*
+
+lib/Dictionary/info.json
+lib/Dictionary/*/*.json
