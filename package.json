@@ -39,7 +39,8 @@
     "start": "echo \"Error: no start specified\" && exit 1",
     "test": "node_modules/mocha/bin/mocha lib/**/*.spec.js lib/*.spec.js",
     "test_cover": "node ./node_modules/istanbul/lib/cli.js --hook-run-in-context cover node_modules/mocha/bin/_mocha -- -R spec   lib/**/*.spec.js lib/*.spec.js",
-    "build-dicts": "node lib/Dictionary/scripts/build.js && node lib/Dictionary/scripts/generateCheatSheets.js"
+    "build-dicts": "node lib/Dictionary/scripts/build.js && node lib/Dictionary/scripts/generateCheatSheets.js",
+    "prepublish": "node lib/Dictionary/scripts/build.js && node_modules/gulp/bin/gulp.js build"
   },
   "author": "Zsolt Lattmann",
   "license": "MIT"
