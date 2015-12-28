@@ -12,6 +12,8 @@ var L = require('../lib/lycophron');
 Login.doLogin();
 console.log(L);
 
+// require('../lib/Solver/generateGames');
+
 var Comment = React.createClass({
 
   getInitialState: function() {
