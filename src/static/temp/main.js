@@ -6,6 +6,12 @@ console.log(L);
 
 window.runTest2 = function () {
   var gameGenerator = new L.GameGenerator();
+
+  gameGenerator.on('progress', function (value) {
+    console.log(value + '%');
+  });
+
+
   // var generatedGameDeferred = gameGenerator.generateGame('en', 'standard', 'WL2014', 'SQUARE');
   var generatedGameDeferred = gameGenerator.generateGame('hu', 'standard', 'me2003', 'SQUARE');
 
