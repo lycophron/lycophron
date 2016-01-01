@@ -15,14 +15,17 @@ var config = {
 	devBaseUrl: 'http://localhost',
 	paths: {
 		html: './src/*.html',
-		js: './src/**/*.js',
+		js: ['./src/**/*.js', './lib/**/*.js'],
 		json: ['./lib/**/*.json'],
 		css: [
-      		// 'node_modules/bootstrap/dist/css/bootstrap.min.css',
+					'./src/css/**/*.css'
+					// 'node_modules/bootstrap/dist/css/bootstrap.min.css',
       		// 'node_modules/bootstrap/dist/css/bootstrap-theme.min.css'
     	],
+		copyFiles: ['./src/static/**/*.html'],
 		dist: './dist',
-		mainJs: './src/main.js'
+		mainJs: './src/main.js',
+		mainTempJs: './src/static/temp/main.js'
 	}
 }
 
@@ -58,6 +61,17 @@ gulp.task('js', function() {
 		.pipe(connect.reload());
 });
 
+gulp.task('temp-js', function() {
+	browserify(config.paths.mainTempJs)
+		// .transform(babelify)
+		.transform(reactify)
+		.bundle()
+		.on('error', console.error.bind(console))
+		.pipe(source('bundle.js'))
+		.pipe(gulp.dest(config.paths.dist + '/temp/'))
+		.pipe(connect.reload());
+});
+
 gulp.task('json', function() {
 	gulp.src(config.paths.json)
 		.pipe(gulp.dest(config.paths.dist))
@@ -77,9 +91,17 @@ gulp.task('lint', function() {
 });
 
 gulp.task('watch', function() {
+	gulp.watch(config.paths.css, ['css']);
 	gulp.watch(config.paths.html, ['html']);
-	gulp.watch(config.paths.js, ['js', 'lint']);
+	gulp.watch(config.paths.js, ['js', 'temp-js', 'lint']);
+	gulp.watch(config.paths.copyFiles, ['copy-files']);
 });
 
-gulp.task('build', ['html', 'js', 'json', 'css', 'lint'])
+gulp.task('copy-files', function() {
+	gulp.src(config.paths.copyFiles)
+		.pipe(gulp.dest(config.paths.dist))
+		.pipe(connect.reload());
+});
+
+gulp.task('build', ['html', 'js', 'temp-js', 'json', 'css', 'lint', 'copy-files'])
 gulp.task('default', ['build', 'open', 'watch']);

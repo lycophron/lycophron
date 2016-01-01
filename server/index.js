@@ -36,7 +36,7 @@ apiRouter.get('/games', function (req, res) {
     // was found, then files is ["**/*.js"]
     // er is an error object or null.
     files = files.filter(function (f) { return f.length === '6fb93000c7ccd077be42c091dfdb00ce9fd345bc.json'.length; });
-    files = files.map(function (f) { return path.basename(f); });
+    files = files.map(function (f) { return path.basename(f, path.extname(f)); });
     res.send(files);
   })
 });
@@ -122,6 +122,10 @@ webSocket.on('connection', function(socket) {
 // static contents
 var path = require('path');
 app.use(express.static(path.join(__dirname, '..', 'dist')));
+
+// app.use(function (req, res) {
+//     return res.redirect(req.protocol + '://' + req.get('Host') + '/#' + req.url);
+// });
 
 server.listen(3000, function () {
   var host = server.address().address;
