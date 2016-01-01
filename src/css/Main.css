@@ -1,0 +1,95 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 1em;
+}
+
+.board {
+  clear: both;
+  opacity: 0.90;
+  /*height: 630px;*/
+  border: 5px solid darkgreen;
+  border-radius: 6px;
+  border-spacing: 0px;
+}
+
+.part {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #000;
+  display: inline-block;
+  background-color: #00af85;
+}
+
+.WORD-3 {
+  background-color: #CF3A3A;
+}
+
+.WORD-2 {
+  background-color: #CCA3BF;
+}
+
+.LETTER-2 {
+  background-color: #65BEEB;
+}
+
+.LETTER-3 {
+  background-color: #2F37FF;
+}
+
+
+
+.tile.has-letter {
+  background-color: #DFB87D;
+  color: #006F00;
+  position: relative;
+  border-radius: 5px;
+}
+
+.tile {
+  float: left;
+  width: 40px;
+  height: 40px;
+  font-family: serif;
+}
+.tile .letter {
+  font-size: 26px;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-align: center;
+  line-height: 40px;
+  vertical-align: middle;
+}
+
+.tile .value {
+  text-align: right;
+  right: 0;
+  bottom: 0;
+  font-size: 12px;
+  position: absolute;
+  padding-right: 2px;
+}
+
+
+.info {
+  font-size: 1.5em;
+}
+
+.info > span {
+  margin: 1ex;
+}
+
+.turn-description {
+  font-size: 1.5em;
+}
+
+.turn-description > span {
+  padding: 1ex;
+}
+
+.turn-description > button {
+  padding: 1ex;
+}

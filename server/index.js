@@ -1,14 +1,17 @@
 'use strict';
 
-
+var compression = require('compression');
 var express = require('express');
 var app = express();
+// compress responses
+app.use(compression());
+
 var http = require('http');
 var server = http.createServer(app);
+
 var glob = require('glob');
 var path = require('path');
 var fs = require('fs');
-
 var winston = require('winston');
 
 var logger = new (winston.Logger)({
