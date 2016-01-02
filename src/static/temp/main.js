@@ -1,4 +1,6 @@
 var $ = require('jquery');
+require('jquery-ui/draggable');
+require('jquery-ui/droppable');
 var request = require('superagent');
 
 var L = require('../../../lib/lycophron');
@@ -116,9 +118,10 @@ $('button').click(function () {
 });
 
 function loadGame(game) {
+  console.log(game);
   var dictionary = new L.Dictionary(game.language + '/' + game.dictionary + '.json');
   var board = new L.Board(game.type);
-  var score = new L.Score(board, dictionary);
+  var score = new L.Score(board, dictionary, game.scoring);
   var rack = new L.Rack();
   var solver = new L.Solver(board, score, dictionary);
   var bag = new L.Bag(game.language, game.type, dictionary);
@@ -159,31 +162,153 @@ function loadGame(game) {
           if (modifier.multiplier > 1) {
             tdE.addClass(modifier.type + '-' + modifier.multiplier);
           }
-          var tileEl = $('<div>', {class: 'accept-tile-drop ui-droppable'});
-          tdE.append(tileEl);
+          tdE.append(createTilePlaceholder(x, y));
         }
+      }
+
+      function createTilePlaceholder(x, y) {
+        var tileEl = $('<div>', {class: 'accept-tile-drop ui-droppable', 'data-x': x, 'data-y': y});
+        tileEl.droppable({
+          accept: function(el) {
+            // TODO: do not accept if there is already one letter from the rack at the same position
+            // return $(this).hasClass(TILE_CONSTANTS.acceptTileDropCSS);
+            var hasTileFromRack = tilesOnRack.filter(function (tileEl) {
+              return tileEl.attr('data-x') === x.toString() && tileEl.attr('data-y') === y.toString();
+            });
+            if (hasTileFromRack.length > 0) {
+              return false;
+            } else {
+              return $(this).hasClass('accept-tile-drop');
+            }
+          },
+          drop: function( event, ui ) {
+            //console.log(ui);
+            //ui.draggable.draggable.position(ui.draggable.draggable.originalPosition);
+
+            // clear x y for letterElement
+            //self.clearLetterElementPosition(ui.draggable);
+            var draggedTile = $(ui.draggable[0]);
+            tileEl.append(draggedTile);
+            draggedTile.css({top: '0', left: '0'});
+            draggedTile.attr('data-x', x);
+            draggedTile.attr('data-y', y);
+            checkMove(tilesOnRack);
+            // console.log(tileEl);
+            // var len = self._onDrop.length;
+            // while (len--) {
+            //     self._onDrop[len]();
+            // }
+          },
+          hoverClass: 'hovered'
+        });
+        return tileEl;
       }
 
       gameEl.append(boardEl);
 
       // rack
-      var rackEl = $('<div>', {class: 'rack'});
+      var rackEl = $('<div>', {class: 'rack tile-container accept-tile-drop ui-droppable'});
+      var tilesOnRack = [];
+      rackEl.droppable({
+        accept: function(el) {
+          // TODO: do not accept if there is already one letter from the rack at the same position
+          // return $(this).hasClass(TILE_CONSTANTS.acceptTileDropCSS);
+          return $(this).hasClass('accept-tile-drop');
+        },
+        drop: function( event, ui ) {
+          // console.log(ui);
+          //ui.draggable.draggable.position(ui.draggable.draggable.originalPosition);
 
+          // clear x y for letterElement
+          //self.clearLetterElementPosition(ui.draggable);
+          var draggedTile = $(ui.draggable[0]);
+          rackEl.append(draggedTile);
+          draggedTile.css({top: '0', left: '0'});
+          draggedTile.attr('data-x', -1);
+          draggedTile.attr('data-y', -1);
+          checkMove(tilesOnRack);
+          // var len = self._onDrop.length;
+          // while (len--) {
+          //     self._onDrop[len]();
+          // }
+        },
+        hoverClass: 'hovered'
+      });
       gameEl.append(rackEl);
+
+      function checkMove(tilesOnRack) {
+        var tilesUsed = tilesOnRack.filter(function (tileEl) {
+          return tileEl.attr('data-x') !== '-1' && tileEl.attr('data-y') !== '-1';
+        });
+        var move = tilesUsed.map(function (tileEl) {
+          return {
+            x: parseInt(tileEl.attr('data-x')),
+            y: parseInt(tileEl.attr('data-y')),
+            tile: {
+              letter: tileEl.find('.letter').attr('data-value'),
+              value: parseInt(tileEl.find('.value').attr('data-value'))
+            }
+          };
+        });
+
+        var result = score.getScore(move);
+
+        // update solver result
+        var resultEl = $('.solver-result');
+        resultEl.children().remove();
+
+        resultEl.append($('<div>', {html: result.message}));
+        var shortDetailsEl = $('<div>', {class: result.success ? 'valid' : 'invalid'});
+        shortDetailsEl.append($('<span>', {html: dictionary.decode(result.word)}));
+        shortDetailsEl.append($('<span>', {html: result.score}));
+        shortDetailsEl.append($('<span>', {html: result.isBingo ? 'BINGO' : ''}));
+        resultEl.append(shortDetailsEl);
+
+        var wordDetailsEl = $('<table>', {class: 'words'});
+        var tbodyEl = $('<tbody>');
+        wordDetailsEl.append(tbodyEl);
+        var partialScore = 0;
+        for (var i = 0; i < result.words.length; i += 1) {
+          var rowEl = $('<tr>', {class: result.words.valid ? 'valid' : 'invalid'});
+          rowEl.append($('<td>', {html: dictionary.decode(result.words[i].word)}));
+          rowEl.append($('<td>', {html: result.words[i].score}));
+          partialScore += result.words[i].score;
+          tbodyEl.append(rowEl);
+        }
+
+
+        var rowEl = $('<tr>', {class: 'extra'});
+        rowEl.append($('<td>', {html: ''}));
+        rowEl.append($('<td>', {html: Math.max(result.score - partialScore, 0)}));
+        tbodyEl.append(rowEl);
+
+        var rowEl = $('<tr>', {class: 'sum' + result.words.valid ? 'valid' : 'invalid'});
+        rowEl.append($('<td>', {html: dictionary.decode(result.word)}));
+        rowEl.append($('<td>', {html: result.score}));
+        tbodyEl.append(rowEl);
+
+        resultEl.append(wordDetailsEl);
+
+        // console.log(result);
+      }
+
+      var solverResultEl = $('<div>', {class: 'solver-result'});
+
+      gameEl.append(solverResultEl);
 
       // controls
       var controlsEl = $('<div>', {class: 'controls'});
-      for (var i = 0; i < game.turns.length; i += 1) {
+      for (var i = 0; i <= game.turns.length; i += 1) {
         controlsEl.append(turnDescription(i));
       }
 
       function turnDescription(id) {
-        var turn = game.turns[id];
+        var turn = game.turns[id] || {word: '', score: '', isBingo: ''};
         var el = $('<div>', {class: 'turn-description'});
         el.append($('<span>', {html: id + 1}));
         var loadBtn = $('<button>', {html: 'Load'});
         loadBtn.on('click', function () {
-          loadTurn(id + 1);
+          loadTurn(id);
         });
         el.append(loadBtn);
         el.append($('<span>', {html: dictionary.decode(turn.word)}));
@@ -194,29 +319,59 @@ function loadGame(game) {
 
       gameEl.append(controlsEl);
 
-      loadTurn(1);
+      loadTurn(0);
 
       //
       function loadTurn(turnId_) {
         // clear tiles on Board
+        board.clear();
         $('table.board').find('.tile').remove();
-
-        var turnId = Math.max(turnId_, 1);
+        $('table.board').find('.ui-droppable').addClass('accept-tile-drop');
+        var turnId = Math.max(turnId_, 0);
         turnId = Math.min(turnId, game.turns.length);
         for (var i = 0; i < turnId; i += 1) {
           for (var j = 0; j < game.turns[i].move.length; j += 1) {
             var move = game.turns[i].move[j];
+            board.setTile(move.x, move.y, new Tile(move.tile.letter, move.tile.value));
             // console.log('Add letter:', game.turns[i].move[j]);
             var placeEl = $('#game table tbody tr:nth-child(' + (move.y + 1) + ') ' + 'td:nth-child(' + (move.x + 1) + ') ');
             placeEl.append(newTile(move.tile));
+            placeEl.find('.ui-droppable').removeClass('accept-tile-drop');
+          }
+        }
+
+        var rackEl = $('div.rack');
+        rackEl.find('.tile').remove();
+        tilesOnRack = [];
+        for (var i = 0; i < tilesOnRack.length; i += 1) {
+          tilesOnRack[i].remove();
+        }
+        if (turnId < game.turns.length) {
+          for (var j = 0; j < game.turns[turnId].rack.length; j += 1) {
+            var tile = game.turns[turnId].rack[j];
+            // console.log('Add letter:', game.turns[i].move[j]);
+            var tileEl = newTile(tile, true);
+            tileEl.attr('data-x', -1);
+            tileEl.attr('data-y', -1);
+            tilesOnRack.push(tileEl);
+            rackEl.append(tileEl);
           }
         }
       }
 
-      function newTile(tile) {
+      function newTile(tile, draggable) {
         var tileEl = $('<div>', {class: 'tile notranslate has-letter'});
-        tileEl.append($('<div>', {class: 'letter', html: dictionary.decode(tile.letter)}));
-        tileEl.append($('<div>', {class: 'value', html: tile.value ? tile.value : ''}));
+        if (draggable) {
+          tileEl.addClass('ui-draggable');
+          tileEl.draggable({
+            stack: 'div',
+            revert: 'invalid'
+          });
+        }
+        var decodedLetter = dictionary.decode(tile.letter);
+        decodedLetter = decodedLetter === L.CONSTANTS.BLANK ? '' : decodedLetter;
+        tileEl.append($('<div>', {class: 'letter', 'data-value': tile.letter, html: decodedLetter}));
+        tileEl.append($('<div>', {class: 'value', 'data-value': tile.value, html: tile.value ? tile.value : ''}));
         return tileEl;
       }
 

@@ -7,6 +7,31 @@ body {
   font-size: 1em;
 }
 
+.rack {
+  background-color: #006400;
+  clear: both;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: block;
+  width: 100%;
+}
+
+.rack.tile-container {
+  float: left;
+  display: inline-block;
+  background-color: #008000;
+  border: 1px solid #008000;
+  max-width: 420px;
+  padding: 5px;
+}
+
+.rack .tile {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 .board {
   clear: both;
   opacity: 0.90;
@@ -22,6 +47,15 @@ body {
   border: 1px solid #000;
   display: inline-block;
   background-color: #00af85;
+}
+
+.part > .accept-tile-drop {
+  width: 100%;
+  height: 100%;
+}
+
+.accept-tile-drop.hovered {
+  background-color: whitesmoke;
 }
 
 .WORD-3 {
@@ -75,6 +109,7 @@ body {
 
 
 .info {
+  clear: both;
   font-size: 1.5em;
 }
 
@@ -83,6 +118,7 @@ body {
 }
 
 .turn-description {
+  clear: both;
   font-size: 1.5em;
 }
 
