@@ -5,6 +5,10 @@ var express = require('express');
 var app = express();
 // compress responses
 app.use(compression());
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
 
 var http = require('http');
 var server = http.createServer(app);
@@ -48,6 +52,16 @@ apiRouter.get('/games/:id([a-f0-9]{40})', function (req, res) {
   // res.send({message: req.params.id + '.json'});
 
   res.send(JSON.parse(fs.readFileSync(req.params.id + '.json')));
+});
+
+apiRouter.post('/games/:id([a-f0-9]{40})', function (req, res) {
+  try {
+    // TODO: validate body
+    fs.writeFileSync(req.params.id + '.json', JSON.stringify(req.body));
+    res.send(201);
+  } catch (err) {
+    next(err);
+  }
 });
 
 apiRouter.get('/tournaments', function (req, res) {

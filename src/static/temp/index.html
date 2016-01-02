@@ -5,8 +5,17 @@
     <link rel="stylesheet" href="/css/bundle.css" />
   </head>
   <body>
-    <button type="button">Generate new game</button>
-    <select name="select"></select>
+    <div>
+      <button id="test" type="button">Test</button>
+    </div>
+    <button id="generate" type="button">Generate new game</button>
+
+    <select id="game-selector" name="select"></select>
+
+    <button id="start" type="button">Start</button>
+    <button id="start-multiplayer" type="button">Start multiplayer</button>
+    <button id="load" type="button">Load</button>
+
     <div id="app"></div>
     <div id="game"><div>
     <script src="/socket.io/socket.io.js"></script>

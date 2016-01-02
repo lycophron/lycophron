@@ -7,6 +7,33 @@ body {
   font-size: 1em;
 }
 
+.solver-result {
+  clear: both;
+  font-size: 1.4em;
+  font-family: monospace;
+}
+
+.solver-result .message {
+  font-weight: bold;
+}
+
+.solver-result span {
+  padding: 0 0.5ex;
+}
+
+.solver-result .invalid {
+  color: #CA0000;
+}
+
+.solver-result tr.sum {
+  font-weight: bold;
+}
+
+.solver-result .score {
+  text-align: right;
+}
+
+
 .rack {
   background-color: #006400;
   clear: both;
@@ -110,7 +137,7 @@ body {
 
 .info {
   clear: both;
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 .info > span {

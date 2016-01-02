@@ -2,10 +2,16 @@ var $ = require('jquery');
 require('jquery-ui/draggable');
 require('jquery-ui/droppable');
 var request = require('superagent');
+var URI = require('urijs');
 
 var L = require('../../../lib/lycophron');
 
 console.log(L);
+
+var url = new URI(window.location.href);
+var query = url.query(true);
+
+console.log(query);
 
 window.runTest2 = function () {
   var gameGenerator = new L.GameGenerator();
@@ -18,10 +24,10 @@ window.runTest2 = function () {
   // var generatedGameDeferred = gameGenerator.generateGame('en', 'standard', 'WL2014', 'SQUARE');
   var generatedGameDeferred = gameGenerator.generateGame('hu', 'standard', 'me2003', 'SQUARE');
 
-  generatedGameDeferred
+  return generatedGameDeferred
     .then(function (generatedGame) {
       console.log(generatedGame);
-      loadGame(generatedGame);
+      return generatedGame;
     });
 };
 
@@ -113,11 +119,85 @@ window.runTest3 = function () {
     .catch(console.error);
 };
 
-$('button').click(function () {
-  runTest2();
+$('#test').click(function () {
+  runTest2()
+    .then(function (generatedGame) {
+      if (generatedGame) {
+        loadGame(generatedGame);
+      }
+    });
 });
 
-function loadGame(game) {
+$('#generate').click(function () {
+  // TODO: move this to a worker
+  var gameGenerator = new L.GameGenerator();
+
+  gameGenerator.on('progress', function (value) {
+    console.log(value + '%');
+    $('#generate').parent().children('.progress').remove();
+    if (value < 100) {
+      $('#generate').parent().prepend($('<span>', {class: 'progress', html: 'Generating game ... ' + value + '%'}));
+    }
+  });
+
+  gameGenerator.on('done', function () {
+    $('#generate').parent().children('.progress').remove();
+  });
+
+  // var generatedGameDeferred = gameGenerator.generateGame('en', 'standard', 'WL2014', 'SQUARE');
+  var generatedGameDeferred = gameGenerator.generateGame('hu', 'standard', 'me2003', 'SQUARE');
+
+  generatedGameDeferred
+    .then(function (generatedGame) {
+      console.log(generatedGame);
+      if (generatedGame) {
+        addNewGame(generatedGame, 'LOCAL');
+        selectGame(generatedGame.id);
+        localGames[generatedGame.id] = generatedGame;
+      }
+    });
+});
+
+var activeGame = {};
+
+$('#start').click(function () {
+  console.log('Start a new game');
+  var game = games[$('#game-selector').val()];
+  activeGame.id = game.id;
+
+  loadGame(games[$('#game-selector').val()], {type: 'SINGLE_PLAYER'});
+});
+
+$('#start-multiplayer').click(function () {
+  console.log('Start a multiplayer game');
+  var game = games[$('#game-selector').val()];
+  activeGame.id = game.id;
+
+  if (games[game.id]) {
+    request
+      .post('/api/games/' + game.id)
+      .send(game)
+      .end(function (err, res) {
+        if (err) {
+          console.log(err);
+        } else {
+          done();
+        }
+      });
+  } else {
+    done();
+  }
+  function done() {
+    loadGame(games[$('#game-selector').val()], {type: 'MULTIPLAYER'});
+  }
+});
+
+$('#load').click(function () {
+  console.log('Load a new game');
+  loadGame(games[$('#game-selector').val()], {type: 'REVIEW'});
+});
+
+function loadGame(game, opts) {
   console.log(game);
   var dictionary = new L.Dictionary(game.language + '/' + game.dictionary + '.json');
   var board = new L.Board(game.type);
@@ -257,7 +337,7 @@ function loadGame(game) {
         var resultEl = $('.solver-result');
         resultEl.children().remove();
 
-        resultEl.append($('<div>', {html: result.message}));
+        resultEl.append($('<div>', {class: 'message ' + (result.success ? 'valid' : 'invalid'), html: result.message}));
         var shortDetailsEl = $('<div>', {class: result.success ? 'valid' : 'invalid'});
         shortDetailsEl.append($('<span>', {html: dictionary.decode(result.word)}));
         shortDetailsEl.append($('<span>', {html: result.score}));
@@ -269,9 +349,9 @@ function loadGame(game) {
         wordDetailsEl.append(tbodyEl);
         var partialScore = 0;
         for (var i = 0; i < result.words.length; i += 1) {
-          var rowEl = $('<tr>', {class: result.words.valid ? 'valid' : 'invalid'});
+          var rowEl = $('<tr>', {class: result.words[i].valid ? 'valid' : 'invalid'});
           rowEl.append($('<td>', {html: dictionary.decode(result.words[i].word)}));
-          rowEl.append($('<td>', {html: result.words[i].score}));
+          rowEl.append($('<td>', {class: 'score', html: result.words[i].score}));
           partialScore += result.words[i].score;
           tbodyEl.append(rowEl);
         }
@@ -279,47 +359,55 @@ function loadGame(game) {
 
         var rowEl = $('<tr>', {class: 'extra'});
         rowEl.append($('<td>', {html: ''}));
-        rowEl.append($('<td>', {html: Math.max(result.score - partialScore, 0)}));
+        rowEl.append($('<td>', {class: 'score', html: Math.max(result.score - partialScore, 0)}));
         tbodyEl.append(rowEl);
 
-        var rowEl = $('<tr>', {class: 'sum' + result.words.valid ? 'valid' : 'invalid'});
+        var rowEl = $('<tr>', {class: 'sum ' + (result.validMove ? 'valid' : 'invalid')});
         rowEl.append($('<td>', {html: dictionary.decode(result.word)}));
-        rowEl.append($('<td>', {html: result.score}));
+        rowEl.append($('<td>', {class: 'score', html: result.score}));
         tbodyEl.append(rowEl);
 
         resultEl.append(wordDetailsEl);
 
-        // console.log(result);
+        console.log(result);
       }
 
       var solverResultEl = $('<div>', {class: 'solver-result'});
 
       gameEl.append(solverResultEl);
 
-      // controls
-      var controlsEl = $('<div>', {class: 'controls'});
-      for (var i = 0; i <= game.turns.length; i += 1) {
-        controlsEl.append(turnDescription(i));
+      if (opts.type === 'REVIEW') {
+        // controls
+        var controlsEl = $('<div>', {class: 'controls'});
+        for (var i = 0; i <= game.turns.length; i += 1) {
+          controlsEl.append(turnDescription(i));
+        }
+
+        function turnDescription(id) {
+          var turn = game.turns[id] || {word: '', score: '', isBingo: ''};
+          var el = $('<div>', {class: 'turn-description'});
+          el.append($('<span>', {html: id + 1}));
+          var loadBtn = $('<button>', {html: 'Load'});
+          loadBtn.on('click', function () {
+            loadTurn(id);
+          });
+          el.append(loadBtn);
+          el.append($('<span>', {html: dictionary.decode(turn.word)}));
+          el.append($('<span>', {html: turn.score}));
+          el.append($('<span>', {html: turn.isBingo ? 'Bingo' : ''}));
+          return el;
+        }
+
+        gameEl.append(controlsEl);
+
+        loadTurn(0);
+      } else if (opts.type === 'SINGLE_PLAYER') {
+        loadTurn(0);
+      } else if (opts.type === 'MULTIPLAYER_PLAYER') {
+        console.log('Waiting for users ...');
+        // TODO: add a new start button
+        // TODO: add a timer
       }
-
-      function turnDescription(id) {
-        var turn = game.turns[id] || {word: '', score: '', isBingo: ''};
-        var el = $('<div>', {class: 'turn-description'});
-        el.append($('<span>', {html: id + 1}));
-        var loadBtn = $('<button>', {html: 'Load'});
-        loadBtn.on('click', function () {
-          loadTurn(id);
-        });
-        el.append(loadBtn);
-        el.append($('<span>', {html: dictionary.decode(turn.word)}));
-        el.append($('<span>', {html: turn.score}));
-        el.append($('<span>', {html: turn.isBingo ? 'Bingo' : ''}));
-        return el;
-      }
-
-      gameEl.append(controlsEl);
-
-      loadTurn(0);
 
       //
       function loadTurn(turnId_) {
@@ -382,6 +470,23 @@ function loadGame(game) {
     });
 }
 
+var games = {};
+var localGames = {};
+
+function addNewGame(game, comment) {
+  games[game.id] = game;
+  var text = game.id.substring(0, 6) + ' ' + game.language + ' ' + game.sumScore + ' ' + game.numBingos + ' ' + game.maxScore;
+  if (comment) {
+    text += ' [' + comment + ']';
+  }
+  var newOptionEl = $('<option>', {value: game.id, html: text});
+  $('#game-selector').prepend(newOptionEl);
+}
+
+function selectGame(id) {
+  $('#game-selector').val(id).change();
+}
+
 request
   .get('/api/games/')
   .end(function (err, res) {
@@ -389,10 +494,9 @@ request
     // console.log(res);
     var gameIds = res.body;
 
-    var games = {};
 
-    $('select').on('change', function () {
-      loadGame(games[$('select').val()]);
+    $('#game-selector').on('change', function () {
+      loadGame(games[$('#game-selector').val()], {type: 'REVIEW'});
     });
 
     for (var i = 0; i < gameIds.length; i += 1) {
@@ -400,10 +504,9 @@ request
         .get('/api/games/' + gameIds[i])
         .end(function (err, res) {
           var game = res.body;
-          games[game.id] = game;
-          $('select').append($('<option>', {value: game.id, html: game.id.substring(0, 6) + ' ' + game.language + ' ' + game.sumScore + ' ' + game.numBingos + ' ' + game.maxScore}));
+          addNewGame(game);
           if (Object.keys(games).length === 1) {
-            $('select').val(game.id).change();
+            selectGame(game.id);
           }
         });
     }
