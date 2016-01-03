@@ -22,10 +22,10 @@ var config = {
 					// 'node_modules/bootstrap/dist/css/bootstrap.min.css',
       		// 'node_modules/bootstrap/dist/css/bootstrap-theme.min.css'
     	],
-		copyFiles: ['./src/static/**/*.html'],
+		// copyFiles: ['./src/static/**/*.html'],
+		// mainTempJs: './src/static/temp/main.js',
 		dist: './dist',
-		mainJs: './src/main.js',
-		mainTempJs: './src/static/temp/main.js'
+		mainJs: './src/main.js'
 	}
 }
 
@@ -61,16 +61,16 @@ gulp.task('js', function() {
 		.pipe(connect.reload());
 });
 
-gulp.task('temp-js', function() {
-	browserify(config.paths.mainTempJs)
-		// .transform(babelify)
-		.transform(reactify)
-		.bundle()
-		.on('error', console.error.bind(console))
-		.pipe(source('bundle.js'))
-		.pipe(gulp.dest(config.paths.dist + '/temp/'))
-		.pipe(connect.reload());
-});
+// gulp.task('temp-js', function() {
+// 	browserify(config.paths.mainTempJs)
+// 		// .transform(babelify)
+// 		.transform(reactify)
+// 		.bundle()
+// 		.on('error', console.error.bind(console))
+// 		.pipe(source('bundle.js'))
+// 		.pipe(gulp.dest(config.paths.dist + '/temp/'))
+// 		.pipe(connect.reload());
+// });
 
 gulp.task('json', function() {
 	gulp.src(config.paths.json)
@@ -93,8 +93,8 @@ gulp.task('lint', function() {
 gulp.task('watch', function() {
 	gulp.watch(config.paths.css, ['css']);
 	gulp.watch(config.paths.html, ['html']);
-	gulp.watch(config.paths.js, ['js', 'temp-js', 'lint']);
-	gulp.watch(config.paths.copyFiles, ['copy-files']);
+	gulp.watch(config.paths.js, ['js', /*'temp-js',*/ 'lint']);
+	// gulp.watch(config.paths.copyFiles, ['copy-files']);
 });
 
 gulp.task('copy-files', function() {
@@ -103,5 +103,5 @@ gulp.task('copy-files', function() {
 		.pipe(connect.reload());
 });
 
-gulp.task('build', ['html', 'js', 'temp-js', 'json', 'css', 'lint', 'copy-files'])
+gulp.task('build', ['html', 'js', /*'temp-js', 'copy-files',*/ 'json', 'css', 'lint'])
 gulp.task('default', ['build', 'open', 'watch']);
