@@ -13,6 +13,7 @@ var query = url.query(true);
 
 console.log(query);
 
+
 window.runTest2 = function () {
   var gameGenerator = new L.GameGenerator();
 
