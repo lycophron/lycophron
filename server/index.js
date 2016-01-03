@@ -1,5 +1,7 @@
 'use strict';
 
+var PORT = 3000;
+
 var compression = require('compression');
 var express = require('express');
 var app = express();
@@ -37,12 +39,12 @@ var apiRouter = express.Router();
 
 apiRouter.get('/games', function (req, res) {
   // res.send({message: 'TODO'});
-  glob("[a-f0-9]*.json", /*options,*/ function (er, files) {
+  glob('upload/games/[a-f0-9]*.json', /*options,*/ function (er, files) {
     // files is an array of filenames.
     // If the `nonull` option is set, and nothing
     // was found, then files is ["**/*.js"]
     // er is an error object or null.
-    files = files.filter(function (f) { return f.length === '6fb93000c7ccd077be42c091dfdb00ce9fd345bc.json'.length; });
+    files = files.filter(function (f) { return path.basename(f).length === '6fb93000c7ccd077be42c091dfdb00ce9fd345bc.json'.length; });
     files = files.map(function (f) { return path.basename(f, path.extname(f)); });
     res.send(files);
   })
@@ -51,13 +53,13 @@ apiRouter.get('/games', function (req, res) {
 apiRouter.get('/games/:id([a-f0-9]{40})', function (req, res) {
   // res.send({message: req.params.id + '.json'});
 
-  res.send(JSON.parse(fs.readFileSync(req.params.id + '.json')));
+  res.send(JSON.parse(fs.readFileSync('upload/games/' + req.params.id + '.json')));
 });
 
 apiRouter.post('/games/:id([a-f0-9]{40})', function (req, res) {
   try {
     // TODO: validate body
-    fs.writeFileSync(req.params.id + '.json', JSON.stringify(req.body));
+    fs.writeFileSync('upload/games/' + req.params.id + '.json', JSON.stringify(req.body));
     res.send(201);
   } catch (err) {
     next(err);
@@ -144,7 +146,7 @@ app.use(express.static(path.join(__dirname, '..', 'dist')));
 //     return res.redirect(req.protocol + '://' + req.get('Host') + '/#' + req.url);
 // });
 
-server.listen(3000, function () {
+server.listen(PORT, function () {
   var host = server.address().address;
   var port = server.address().port;
 
