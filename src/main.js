@@ -207,6 +207,20 @@ $('#load').click(function () {
   loadGame(games[$('#game-selector').val()], {type: 'REVIEW'});
 });
 
+
+function reportBug(bug) {
+  request
+    .post('/api/bugs')
+    .send(bug)
+    .end(function (err, res) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('bug was reported.');
+      }
+    });
+}
+
 function loadGame(game, opts) {
   console.log(game);
   var dictionary = new L.Dictionary(game.language + '/' + game.dictionary + '.json');
@@ -262,6 +276,49 @@ function loadGame(game, opts) {
             user: move.score,
             percentage: percentage
           });
+
+          if (move.score > 0) {
+            var solutions = solver.solve(rack);
+            var found = false;
+            for (var i = 0; i < solutions.length; i += 1) {
+              if (solutions[i].score === move.score &&
+                solutions[i].x === move.x &&
+                solutions[i].y === move.y &&
+                solutions[i].direction === move.direction) {
+
+                  found = true;
+                  break;
+                }
+            }
+
+            if (found) {
+
+            } else {
+              var tilesUsed = tilesOnRack.filter(function (tileEl) {
+                return tileEl.attr('data-x') !== '-1' && tileEl.attr('data-y') !== '-1';
+              });
+              var rack = tilesUsed.map(function (tileEl) {
+                return {
+                  x: parseInt(tileEl.attr('data-x')),
+                  y: parseInt(tileEl.attr('data-y')),
+                  tile: {
+                    letter: tileEl.find('.letter').attr('data-value'),
+                    value: parseInt(tileEl.find('.value').attr('data-value'))
+                  }
+                };
+              });
+
+              reportBug({
+                turnId: this.turnId,
+                rack: rack,
+                move: move,
+                game: game
+              });
+            }
+          }
+
+          // TODO: check if we have found the word that the user played.
+          // TODO: add report bug
         }
 
         this.turnId += 1;
@@ -375,6 +432,18 @@ function loadGame(game, opts) {
       // buttons
       var buttonsEl = $('<div>', {class: 'buttons'});
       gameEl.append(buttonsEl);
+
+      var clearEl = $('<button>', {html: 'Clear'});
+
+      clearEl.on('click', function () {
+        for (var i = 0; i < tilesOnRack.length; i += 1) {
+          rackEl.append(tilesOnRack[i]);
+          tilesOnRack[i].attr('data-x', -1);
+          tilesOnRack[i].attr('data-y', -1);
+        }
+      });
+
+      buttonsEl.append(clearEl);
 
       // rack
       var rackEl = $('<div>', {class: 'rack tile-container accept-tile-drop ui-droppable'});
@@ -534,6 +603,7 @@ function loadGame(game, opts) {
         var rackEl = $('div.rack');
         rackEl.find('.tile').remove();
         tilesOnRack = [];
+        rack.clear();
         for (var i = 0; i < tilesOnRack.length; i += 1) {
           tilesOnRack[i].remove();
         }
@@ -546,6 +616,7 @@ function loadGame(game, opts) {
             tileEl.attr('data-x', -1);
             tileEl.attr('data-y', -1);
             tilesOnRack.push(tileEl);
+            rack.addTile(new L.Tile(tile.letter, tile.value));
             rackEl.append(tileEl);
           }
         }
@@ -562,7 +633,7 @@ function loadGame(game, opts) {
         }
         var decodedLetter = dictionary.decode(tile.letter);
         decodedLetter = decodedLetter === L.CONSTANTS.BLANK ? '' : decodedLetter;
-        var letterEl = $('<div>', {class: 'letter', 'data-value': tile.letter, html: decodedLetter});
+        var letterEl = $('<div>', {class: 'letter', 'data-value': dictionary.encode([tile.letter]), html: decodedLetter});
         if (decodedLetter.length === 3) {
           letterEl.addClass('three-letters');
         }

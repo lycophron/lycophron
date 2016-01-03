@@ -5,6 +5,7 @@ coverage/*
 
 dist/*
 upload/**/*.json
+bugs/**/*.json
 
 lib/Dictionary/info.json
 lib/Dictionary/*/*.json

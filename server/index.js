@@ -60,7 +60,19 @@ apiRouter.post('/games/:id([a-f0-9]{40})', function (req, res) {
   try {
     // TODO: validate body
     fs.writeFileSync('upload/games/' + req.params.id + '.json', JSON.stringify(req.body));
-    res.send(201);
+    res.sendStatus(201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+apiRouter.post('/bugs/', function (req, res) {
+  try {
+    // TODO: validate body
+    var bugReportFileName = 'bugs/' + (new Date()).toISOString() + '.json';
+    logger.info('Bug report was received:', bugReportFileName);
+    fs.writeFileSync(bugReportFileName, JSON.stringify(req.body));
+    res.sendStatus(201);
   } catch (err) {
     next(err);
   }

@@ -63,7 +63,7 @@ body {
 }
 
 .tile.has-letter.on-rack {
-  color: #F0F0F0;
+  color: #333333;
 }
 
 .tile.has-letter.blank {
