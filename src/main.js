@@ -1,3 +1,12 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// FIXME: WARNING
+//
+// TODO: THIS IS A TEMPORARY IMPLEMENTATION, MUST BE COMPLETELY REWRITTEN
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
 var $ = require('jquery');
 require('jquery-ui/draggable');
 require('jquery-ui/droppable');
@@ -210,6 +219,79 @@ function loadGame(game, opts) {
   bag.ready()
     .then(function () {
 
+      // TODO: add game, bag, dictionary, board, score, rack, solver
+      var SinglePlayerGame = function (opts) {
+        this.turnId = -1;
+        this.timer = 90; // in seconds
+        this.moves = [];
+        this.scores = [];
+        this.currentMaxScore = 0;
+        this.currentScore = 0;
+        this.percentage = 100;
+      };
+
+      SinglePlayerGame.prototype.nextTurn = function () {
+        if (this.turnId >= game.turns.length) {
+          this.finish();
+          return;
+        }
+
+        if (this.turnId >= 0) {
+          // get score
+          var move = checkMove(tilesOnRack);
+          console.log(move);
+          this.moves.push(move);
+
+          // record score
+          var percentage;
+          var max = game.turns[this.turnId].score;
+
+          if (max === 0) {
+            percentage = 100;
+          } else {
+            percentage = move.score / max
+          }
+
+          this.currentMaxScore += max;
+          this.currentScore += move.score;
+
+          this.percentage = Math.floor(this.currentScore / this.currentMaxScore * 100 * 100) / 100;
+
+          this.scores.push({
+            max: max,
+            user: move.score,
+            percentage: percentage
+          });
+        }
+
+        this.turnId += 1;
+
+        // some UI related things that must be factored out
+        $('.score-results').remove();
+        var scoreEl = $('<div>', {class: 'score-results'});
+        scoreEl.append($('<span>', {html: ' U: ' + this.currentScore + ' '}));
+        scoreEl.append($('<span>', {html: ' M: ' + this.currentMaxScore + ' '}));
+        scoreEl.append($('<span>', {html: ' P: ' + this.percentage + '%'}));
+        scoreEl.append($('<span>', {html: ' Max score for this round: ' + game.turns[this.turnId].score + ' '}));
+        buttonsEl.append(scoreEl);
+
+        // load next turn
+        loadTurn(this.turnId);
+
+        // reset timer
+      };
+
+      SinglePlayerGame.prototype.start = function () {
+        this.nextTurn();
+      };
+
+      SinglePlayerGame.prototype.finish = function () {
+        // clear timer
+
+        // load last turn
+        loadTurn(game.turns.length - 1);
+      };
+
       var gameEl = $('#game');
       gameEl.children().remove();
 
@@ -286,6 +368,10 @@ function loadGame(game, opts) {
       }
 
       gameEl.append(boardEl);
+
+      // buttons
+      var buttonsEl = $('<div>', {class: 'buttons'});
+      gameEl.append(buttonsEl);
 
       // rack
       var rackEl = $('<div>', {class: 'rack tile-container accept-tile-drop ui-droppable'});
@@ -370,7 +456,9 @@ function loadGame(game, opts) {
 
         resultEl.append(wordDetailsEl);
 
-        console.log(result);
+        // console.log(result);
+
+        return result;
       }
 
       var solverResultEl = $('<div>', {class: 'solver-result'});
@@ -403,7 +491,18 @@ function loadGame(game, opts) {
 
         loadTurn(0);
       } else if (opts.type === 'SINGLE_PLAYER') {
-        loadTurn(0);
+        var singlePlayer = new SinglePlayerGame();
+        singlePlayer.start();
+
+        var okEl = $('<button>', {html: 'OK'});
+        okEl.on('click', function () {
+          okEl.prop('disabled', true);
+          singlePlayer.nextTurn();
+          setTimeout(function () {
+            okEl.prop('disabled', false);
+          }, 3000);
+        });
+        buttonsEl.append(okEl);
       } else if (opts.type === 'MULTIPLAYER_PLAYER') {
         console.log('Waiting for users ...');
         // TODO: add a new start button
