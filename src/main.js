@@ -272,7 +272,9 @@ function loadGame(game, opts) {
         scoreEl.append($('<span>', {html: ' U: ' + this.currentScore + ' '}));
         scoreEl.append($('<span>', {html: ' M: ' + this.currentMaxScore + ' '}));
         scoreEl.append($('<span>', {html: ' P: ' + this.percentage + '%'}));
-        scoreEl.append($('<span>', {html: ' Max score for this round: ' + game.turns[this.turnId].score + ' '}));
+        if (game.turns[this.turnId]) {
+          scoreEl.append($('<span>', {html: ' Max score for this round: ' + game.turns[this.turnId].score + ' '}));
+        }
         buttonsEl.append(scoreEl);
 
         // load next turn
@@ -282,6 +284,7 @@ function loadGame(game, opts) {
       };
 
       SinglePlayerGame.prototype.start = function () {
+        // this.turnId = game.turns.length - 2;
         this.nextTurn();
       };
 
