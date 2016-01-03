@@ -440,6 +440,7 @@ function loadGame(game, opts) {
             var tile = game.turns[turnId].rack[j];
             // console.log('Add letter:', game.turns[i].move[j]);
             var tileEl = newTile(tile, true);
+            tileEl.addClass('on-rack');
             tileEl.attr('data-x', -1);
             tileEl.attr('data-y', -1);
             tilesOnRack.push(tileEl);
@@ -459,8 +460,45 @@ function loadGame(game, opts) {
         }
         var decodedLetter = dictionary.decode(tile.letter);
         decodedLetter = decodedLetter === L.CONSTANTS.BLANK ? '' : decodedLetter;
-        tileEl.append($('<div>', {class: 'letter', 'data-value': tile.letter, html: decodedLetter}));
+        var letterEl = $('<div>', {class: 'letter', 'data-value': tile.letter, html: decodedLetter});
+        if (decodedLetter.length === 3) {
+          letterEl.addClass('three-letters');
+        }
+        tileEl.append(letterEl);
         tileEl.append($('<div>', {class: 'value', 'data-value': tile.value, html: tile.value ? tile.value : ''}));
+        if (tile.value === 0) {
+          // blank
+          tileEl.addClass('blank');
+          if (draggable) {
+            tileEl.on('dblclick', function () {
+              console.log('open selection');
+              $('.blank-selection').remove();
+              var blankSelectionEl = $('<div>', {class: 'blank-selection'});
+              $('.rack').append(blankSelectionEl);
+
+
+              function addBlankTile(l) {
+                var blankTileEl = newTile({letter: bag.blankSelection[i], value: 0});
+                blankSelectionEl.append(blankTileEl);
+                blankTileEl.on('click', function () {
+                  var decodedLetter = blankTileEl.children('.letter').html();
+                  letterEl.html(decodedLetter);
+                  letterEl.attr('data-value', blankTileEl.children('.letter').attr('data-value'));
+                  letterEl.removeClass('three-letters');
+                  if (decodedLetter.length === 3) {
+                    letterEl.addClass('three-letters');
+                  }
+                  checkMove(tilesOnRack);
+                  blankSelectionEl.remove();
+                });
+              }
+              for (var i = 0; i < bag.blankSelection.length; i += 1) {
+                addBlankTile(bag.blankSelection[i]);
+              }
+
+            });
+          }
+        }
         return tileEl;
       }
 

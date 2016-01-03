@@ -3,8 +3,12 @@
   padding: 0;
 }
 
+div {
+  box-sizing: border-box;
+}
+
 body {
-  font-size: 1em;
+  font-size: 16px;
 }
 
 .solver-result {
@@ -33,7 +37,6 @@ body {
   text-align: right;
 }
 
-
 .rack {
   background-color: #006400;
   clear: both;
@@ -50,7 +53,7 @@ body {
   display: inline-block;
   background-color: #008000;
   border: 1px solid #008000;
-  max-width: 420px;
+  max-width: 445px;
   padding: 5px;
 }
 
@@ -59,19 +62,50 @@ body {
     margin-right: 10px;
 }
 
+.tile.has-letter.on-rack {
+  color: #FFFFFF;
+}
+
+.tile.has-letter.blank {
+  color: #CF3A3A;
+}
+.tile.has-letter.on-rack.blank {
+  color: #CF3A3A;
+}
+
+.tile .letter.three-letters {
+  font-size: 20px;
+}
+
+.blank-selection {
+  position: fixed;
+  top: 30%;
+  background-color: #070;
+  border: 2.5px solid #dfb87d;
+  padding: 2.5px;
+  width: 630px;
+}
+
+.blank-selection .tile {
+  margin: 4px;
+}
+
 .board {
   clear: both;
   opacity: 0.90;
-  /*height: 630px;*/
-  border: 5px solid darkgreen;
+  border: 0.6ex solid darkgreen;
   border-radius: 6px;
   border-spacing: 0px;
+}
+
+.board tr {
+  display: flex;
 }
 
 .part {
   width: 40px;
   height: 40px;
-  border: 1px solid #000;
+  border: 0.2ex solid #000;
   display: inline-block;
   background-color: #00af85;
 }
