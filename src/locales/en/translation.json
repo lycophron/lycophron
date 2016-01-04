@@ -25,7 +25,7 @@
   "login": {
     "header": "Login to Lycophron.org",
     "info": "Currently this application is under alpha testing and it is open to a limited number of people. If you cannot login that means you are not an alpha tester. Please come back later.",
-    "google": "Use a Google Account",
+    "google": "Login with a Google Account (@gmail.com email)",
 
 
     "failedHeader": "Login failed",

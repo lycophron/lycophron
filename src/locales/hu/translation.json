@@ -24,7 +24,7 @@
   "login": {
     "header": "Bejelentkezés a Lycophron.org weboldalra",
     "info": "Jelenleg ez az alkalmazás 'alpha' tesztelés alatt áll, csak néhány teszter férhet hozzá. Ha nem sikerül belépned, akkor Te nem vagy a teszterek között. Kérlek látogass vissza később.",
-    "google": "Google fiókom használata",
+    "google": "Bejelentkezés a Google fiókom használatával (@gmail.com címmel)",
 
 
     "failedHeader": "Sikertelen bejelentkezés",
