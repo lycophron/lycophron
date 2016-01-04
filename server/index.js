@@ -34,6 +34,7 @@ function start(config, done) {
         var express = require('express'),
             cookieParser = require('cookie-parser'),
             compression = require('compression'),
+            bodyParser = require('body-parser'),
 
             auth = require('./auth'),
             controller = require('./controllers'),
@@ -54,6 +55,8 @@ function start(config, done) {
         logger.debug('Configuring application ...');
         app.use(cookieParser());
         app.use(compression({threshold: 512}));
+        app.use(bodyParser.json()); // for parsing application/json
+        app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
         //app.use(function (req, res, next) {
         //    logger.debug(req.url);
