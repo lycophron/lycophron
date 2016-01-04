@@ -36,9 +36,14 @@ function init(app, logger) {
         // If the `nonull` option is set, and nothing
         // was found, then files is ["**/*.js"]
         // er is an error object or null.
-        files = files.filter(function (f) { return path.basename(f).length === '6fb93000c7ccd077be42c091dfdb00ce9fd345bc.json'.length; });
-        files = files.map(function (f) { return path.basename(f, path.extname(f)); });
-        res.send(files);
+        if (er) {
+          logger.error(er);
+          res.send(500);
+        } else {
+          files = files.filter(function (f) { return path.basename(f).length === '6fb93000c7ccd077be42c091dfdb00ce9fd345bc.json'.length; });
+          files = files.map(function (f) { return path.basename(f, path.extname(f)); });
+          res.send(files);
+        }
       })
     });
 

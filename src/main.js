@@ -172,39 +172,52 @@ var activeGame = {};
 
 $('#start').click(function () {
   console.log('Start a new game');
-  var game = games[$('#game-selector').val()];
-  activeGame.id = game.id;
+  var gameId = $('#game-selector').val();
 
-  loadGame(games[$('#game-selector').val()], {type: 'SINGLE_PLAYER'});
+  if (gameId) {
+    var game = games[gameId];
+    activeGame.id = game.id;
+    loadGame(games[$('#game-selector').val()], {type: 'SINGLE_PLAYER'});
+  }
 });
 
 $('#start-multiplayer').click(function () {
   console.log('Start a multiplayer game');
-  var game = games[$('#game-selector').val()];
-  activeGame.id = game.id;
+  var gameId = $('#game-selector').val();
 
-  if (games[game.id]) {
-    request
-      .post('/api/games/' + game.id)
-      .send(game)
-      .end(function (err, res) {
-        if (err) {
-          console.log(err);
-        } else {
-          done();
-        }
-      });
-  } else {
-    done();
-  }
-  function done() {
-    loadGame(games[$('#game-selector').val()], {type: 'MULTIPLAYER'});
+  if (gameId) {
+    var game = games[gameId];
+    activeGame.id = game.id;
+
+    if (games[game.id]) {
+      request
+        .post('/api/games/' + game.id)
+        .send(game)
+        .end(function (err, res) {
+          if (err) {
+            console.log(err);
+          } else {
+            done();
+          }
+        });
+    } else {
+      done();
+    }
+    function done() {
+      loadGame(game, {type: 'MULTIPLAYER'});
+    }
   }
 });
 
 $('#load').click(function () {
   console.log('Load a new game');
-  loadGame(games[$('#game-selector').val()], {type: 'REVIEW'});
+  var gameId = $('#game-selector').val();
+
+  if (gameId) {
+    var game = games[gameId];
+    activeGame.id = game.id;
+    loadGame(game, {type: 'REVIEW'});
+  }
 });
 
 
@@ -297,7 +310,7 @@ function loadGame(game, opts) {
               var tilesUsed = tilesOnRack.filter(function (tileEl) {
                 return tileEl.attr('data-x') !== '-1' && tileEl.attr('data-y') !== '-1';
               });
-              var rack = tilesUsed.map(function (tileEl) {
+              var userRack = tilesUsed.map(function (tileEl) {
                 return {
                   x: parseInt(tileEl.attr('data-x')),
                   y: parseInt(tileEl.attr('data-y')),
@@ -310,7 +323,7 @@ function loadGame(game, opts) {
 
               reportBug({
                 turnId: this.turnId,
-                rack: rack,
+                rack: userRack,
                 move: move,
                 game: game
               });
