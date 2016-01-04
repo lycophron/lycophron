@@ -53,6 +53,9 @@ function start(config, done) {
         }
 
         logger.debug('Configuring application ...');
+
+        // app.set('trust proxy', 'loopback');
+
         app.use(cookieParser());
         app.use(compression({threshold: 512}));
         app.use(bodyParser.json()); // for parsing application/json

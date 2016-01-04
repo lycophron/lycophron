@@ -184,10 +184,11 @@ function init(app, logger, config) {
 
     logger.debug('Adding generic /auth/ rules');
     app.get('/auth/success', function (req, res) {
+        var ip = req.get('X-Real-IP') || req.ip;
         if (req.user) {
-            logger.info('Successful login ' + req.user.displayName + ' ' + req.user.emails[0].value + ' from ' + req.ip);
+            logger.info('Successful login ' + req.user.displayName + ' ' + req.user.emails[0].value + ' from ' + ip);
         } else {
-            logger.error('Success page was requested by ' + req.ip + ' but no user name is given.');
+            logger.error('Success page was requested by ' + ip + ' but no user name is given.');
         }
         res.redirect(req.session.authRedirect || '/');
     });
@@ -204,7 +205,7 @@ function init(app, logger, config) {
 
     app.get('/auth/', function (req, res) {
         // get first name and last name initial at least and send it back
-        var responseData = {id: null, displayName: config.authentication.guestAccount};
+        var responseData = {id: null, displayName: config.authentication.guestAccount, emails: ['anonymous@example.com']};
         if (req.user) {
             users.findOne({id: req.user.id}, function (err, user) {
                 if (err) {
@@ -215,16 +216,13 @@ function init(app, logger, config) {
                 if (user) {
                     delete user._id;
                     delete user.__v;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.end(JSON.stringify(user));
+                    res.send(user);                  
                 } else {
-                    res.status(404);
-                    res.send('Could not find user');
+                    res.sendStatus(404);
                 }
             });
         } else {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify(responseData));
+          res.send(responseData);
         }
     });
 

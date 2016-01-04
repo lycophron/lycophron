@@ -63,11 +63,15 @@ function init(app, logger) {
       }
     });
 
-    apiRouter.post('/bugs/', function (req, res) {
+    apiRouter.post('/bugs/', function (req, res, next) {
       try {
         // TODO: validate body
         var bugReportFileName = 'bugs/' + (new Date()).toISOString() + '.json';
-        logger.info('Bug report was received:', bugReportFileName);
+        var userInfo = '';
+        if (req.user) {
+           userInfo = ' from ' + req.user.displayName + ' ' + req.user.emails[0].value;
+        }
+        logger.info('Bug report was received' + userInfo + ': ' + bugReportFileName);
         fs.writeFileSync(bugReportFileName, JSON.stringify(req.body));
         res.sendStatus(201);
       } catch (err) {
