@@ -1,0 +1,52 @@
+{
+  "oldGame": "Régi játék megnyitása (elérhető 2015. 03. 25-ig)",
+
+  "underConstruction": "Fejlesztés alatt ...",
+
+  "version": "Verzió",
+  "modifiedOn": "Utoljára frissítve",
+  "openOnGitHub": "Forrás kód GitHub-on",
+
+  "chooseLanguage": "Válassz nyelvet",
+
+  "numWordsText": "Szavak száma:",
+
+  "consonantsText": "Mássalhangzók",
+  "vowelsText": "Magánhangzók",
+  "jokersText": "Jokerek",
+
+  "words": "szó",
+
+  "createNewGame": "Új játék indítása",
+
+  "mayTakeAFewSeconds": "Ez eltarthat néhány másodpercig ...",
+
+  "login": {
+    "header": "Bejelentkezés a Lycophron.org weboldalra",
+    "info": "Jelenleg ez az alkalmazás 'alpha' tesztelés alatt áll, csak néhány teszter férhet hozzá. Ha nem sikerül belépned, akkor Te nem vagy a teszterek között. Kérlek látogass vissza később.",
+    "google": "Google fiókom használata",
+
+
+    "failedHeader": "Sikertelen bejelentkezés",
+
+    "failedInfo": "Kedves {{username}}. Sajnáljuk, de az oldal tartalmához nem férhetsz hozzá.",
+
+    "mainPageText": "Vissza a főoldalra",
+    "loginText": "Vissza a bejelentkezéshez",
+    "logoutText": "Kilépés"
+  },
+
+  "home": {
+    "welcomeMessage": "Ez a weboldal még fejlesztés alatt áll. Használd a baloldali menüt új játék kezdéséhez."
+  },
+
+  "ready": "Kész",
+  "loadingLanguages": "loadingLanguages",
+  "failedToLoadLanguages": "failedToLoadLanguages",
+
+  "waitingForUsers": "várakozás ...",
+  "running": "játékban",
+
+  "confirm": "Megerősítés",
+  "cancel": "Mégsem"
+}

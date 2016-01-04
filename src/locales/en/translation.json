@@ -1,0 +1,54 @@
+{
+  "oldGame": "Open the old game (available till 03/25/2015)",
+
+  "underConstruction": "Under construction ...",
+
+  "version": "Version",
+  "modifiedOn": "Last modified",
+  "openOnGitHub": "Source code on GitHub",
+
+  "chooseLanguage": "Choose a language",
+
+  "numWordsText": "Number of words:",
+
+  "consonantsText": "Consonants",
+  "vowelsText": "Vowels",
+  "jokersText": "Jokers",
+
+  "words": "words",
+
+  "createNewGame": "Create a new game",
+
+  "mayTakeAFewSeconds": "This may take a few seconds.",
+
+
+  "login": {
+    "header": "Login to Lycophron.org",
+    "info": "Currently this application is under alpha testing and it is open to a limited number of people. If you cannot login that means you are not an alpha tester. Please come back later.",
+    "google": "Use a Google Account",
+
+
+    "failedHeader": "Login failed",
+
+    "failedInfo": "Dear {{username}} Sorry, but you cannot access to this site.",
+
+    "mainPageText": "Back to main page",
+    "loginText": "Back to login page",
+    "logoutText": "Logout"
+  },
+
+  "home": {
+    "welcomeMessage": "This website is still under construction. Use the menu on the left hand side to create a new game."
+  },
+
+  "ready": "Done",
+  "loadingLanguages": "loadingLanguages",
+  "failedToLoadLanguages": "failedToLoadLanguages",
+
+
+  "waitingForUsers": "waiting ...",
+  "running": "in progress",
+
+  "confirm": "Confirm",
+  "cancel": "Cancel"
+}

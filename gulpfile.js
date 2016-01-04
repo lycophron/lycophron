@@ -8,6 +8,7 @@ var reactify = require('reactify');  // Transforms React JSX to JS
 var source = require('vinyl-source-stream'); // Use conventional text streams with Gulp
 var concat = require('gulp-concat'); //Concatenates files
 var lint = require('gulp-eslint'); //Lint JS files, including JSX
+var shell = require('gulp-shell');
 var babelify = require("babelify");
 
 var config = {
@@ -16,7 +17,7 @@ var config = {
 	paths: {
 		html: './src/*.html',
 		js: ['./src/**/*.js', './lib/**/*.js'],
-		json: ['./lib/**/*.json'],
+		json: ['./lib/**/*.json', './src/**/*.json'],
 		css: [
 					'./src/css/**/*.css'
 					// 'node_modules/bootstrap/dist/css/bootstrap.min.css',
@@ -24,6 +25,9 @@ var config = {
     	],
 		// copyFiles: ['./src/static/**/*.html'],
 		// mainTempJs: './src/static/temp/main.js',
+		copyAuthFiles: ['./src/auth/**/*.*'],
+		distAuth: './dist/auth/',
+
 		dist: './dist',
 		mainJs: './src/main.js'
 	}
@@ -93,8 +97,10 @@ gulp.task('lint', function() {
 gulp.task('watch', function() {
 	gulp.watch(config.paths.css, ['css']);
 	gulp.watch(config.paths.html, ['html']);
+	gulp.watch(config.paths.json, ['json']);
 	gulp.watch(config.paths.js, ['js', /*'temp-js',*/ 'lint']);
 	// gulp.watch(config.paths.copyFiles, ['copy-files']);
+	gulp.watch(config.paths.copyAuthFiles, ['copy-auth-files']);
 });
 
 gulp.task('copy-files', function() {
@@ -103,5 +109,15 @@ gulp.task('copy-files', function() {
 		.pipe(connect.reload());
 });
 
-gulp.task('build', ['html', 'js', /*'temp-js', 'copy-files',*/ 'json', 'css', 'lint'])
+gulp.task('copy-auth-files', function() {
+	gulp.src(config.paths.copyAuthFiles)
+		.pipe(gulp.dest(config.paths.distAuth))
+		.pipe(connect.reload());
+});
+
+gulp.task('update-version',
+    shell.task(['git log -1 --pretty=format:\'{%n  "commit": "%H",%n  "date": "%ad",%n  "message": "%s"%n}\'' +
+    ' > version.json']));
+
+gulp.task('build', ['update-version', 'html', 'js', /*'temp-js', 'copy-files',*/ 'copy-auth-files', 'json', 'css', 'lint'])
 gulp.task('default', ['build', 'open', 'watch']);

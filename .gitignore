@@ -9,3 +9,8 @@ bugs/**/*.json
 
 lib/Dictionary/info.json
 lib/Dictionary/*/*.json
+
+salts.json
+users.json
+users.nedb
+version.json
