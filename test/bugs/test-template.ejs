@@ -1,0 +1,51 @@
+'use strict';
+
+// <%= bug.game.id %>
+
+var assert = require('assert');
+var L = require('../../lib/lycophron');
+var Score = L.Score;
+var Board = L.Board;
+var Bag = L.Bag;
+var Rack = L.Rack;
+var Tile = L.Tile;
+var CONSTANTS = require('../../lib/Constants');
+
+var Solver = L.Solver;
+
+var Dictionary = L.Dictionary;
+var fs = require('fs');
+
+var dictionary = new Dictionary('<%= bug.game.language + '/' + bug.game.dictionary + '.json' %>');
+var bag = new Bag('<%= bug.game.language %>', '<%= bug.game.type %>', dictionary);
+
+describe('<%= name %>', function () {
+  it('should find solution - <%= bug.move.word %>', function () {
+    this.timeout(10000);
+    var board = new Board();
+    var score = new Score(board, dictionary, '<%= bug.game.scoring %>');
+    var rack = new Rack();
+    var solver = new Solver(board, score, dictionary);
+    // setup board
+
+    <% for (var i = 0; i < bug.turnId; i += 1) {
+        for (var j = 0; j < bug.game.turns[i].move.length; j += 1) { %>
+    board.setTile(<%= bug.game.turns[i].move[j].x %>, <%= bug.game.turns[i].move[j].y %>, new Tile('<%= bug.game.turns[i].move[j].tile.letter %>', <%= bug.game.turns[i].move[j].tile.value %>));<%
+      }
+    } %>
+
+
+    // set rack
+
+    <% for (var i = 0; i < bug.rack.length; i += 1) { %>
+    rack.addTile(new Tile('<%= bug.rack[i].tile.letter %>', <%= bug.rack[i].tile.value %>));<%
+      } %>
+
+    var solutions = solver.solve(rack);
+    // Score: <%= bug.move.score %> y:<%= bug.move.x %> y:<%= bug.move.y %> word:<%= bug.move.word %>
+    solutions = solutions.filter(function (s) { return s.x === <%= bug.move.x %> && s.y === <%= bug.move.y %> && s.word === '<%= bug.move.word %>'; });
+    //console.log(solutions);
+    assert.equal(solutions.length, 1);
+    assert.equal(solutions[0].score, <%= bug.move.score %>);
+  });
+});
