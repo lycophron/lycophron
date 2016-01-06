@@ -10,16 +10,18 @@ var Bag = L.Bag;
 var Rack = L.Rack;
 var Tile = L.Tile;
 var CONSTANTS = require('../../lib/Constants');
+var fixture = require('./fixture');
 
 var Solver = L.Solver;
 
 var Dictionary = L.Dictionary;
 var fs = require('fs');
 
-var dictionary = new Dictionary('<%= bug.game.language + '/' + bug.game.dictionary + '.json' %>');
-var bag = new Bag('<%= bug.game.language %>', '<%= bug.game.type %>', dictionary);
 
 describe('<%= name %>', function () {
+  var dictionary = fixture['<%= bug.game.language + '/' + bug.game.dictionary + '.json' %>'];
+  var bag = new Bag('<%= bug.game.language %>', '<%= bug.game.type %>', dictionary);
+
   it('should find solution - <%= bug.move.word %>', function () {
     this.timeout(10000);
     var board = new Board();
