@@ -14,6 +14,7 @@ var request = require('superagent');
 var URI = require('urijs');
 
 var L = require('../lib/lycophron');
+L.version = require('../version.json');
 
 console.log(L);
 

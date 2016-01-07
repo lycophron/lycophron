@@ -98,7 +98,7 @@ gulp.task('watch', function() {
 	gulp.watch(config.paths.css, ['css']);
 	gulp.watch(config.paths.html, ['html']);
 	gulp.watch(config.paths.json, ['json']);
-	gulp.watch(config.paths.js, ['js', /*'temp-js',*/ 'lint']);
+	gulp.watch(config.paths.js, ['update-version', 'js', /*'temp-js',*/ 'lint']);
 	// gulp.watch(config.paths.copyFiles, ['copy-files']);
 	gulp.watch(config.paths.copyAuthFiles, ['copy-auth-files']);
 });
