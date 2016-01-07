@@ -45,7 +45,7 @@ describe('<%= name %>', function () {
 
     var solutions = solver.solve(rack);
     // Score: <%= bug.move.score %> y:<%= bug.move.x %> y:<%= bug.move.y %> word:<%= bug.move.word %>
-    solutions = solutions.filter(function (s) { return s.x === <%= bug.move.x %> && s.y === <%= bug.move.y %> && s.word === '<%= bug.move.word %>'; });
+    solutions = solutions.filter(function (s) { return s.x === <%= bug.move.x %> && s.y === <%= bug.move.y %> && s.word === '<%= bug.move.word %>' && s.direction === '<%= bug.move.direction %>'; });
     //console.log(solutions);
     assert.equal(solutions.length, 1);
     assert.equal(solutions[0].score, <%= bug.move.score %>);
