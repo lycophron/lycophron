@@ -66,7 +66,7 @@ window.runTest = function () {
     .then(function () {
       console.log('here');
       solver.getSolution(['?', 'E'], null, ['X', 'h']);
-      
+
       var solutions = solver.solve(rack);
       console.log(solutions);
       console.error('done');
@@ -623,7 +623,7 @@ function loadGame(game, opts) {
             var move = game.turns[i].move[j];
             board.setTile(move.x, move.y, new L.Tile(move.tile.letter, move.tile.value));
             // console.log('Add letter:', game.turns[i].move[j]);
-            var placeEl = $('#game table tbody tr:nth-child(' + (move.y + 1) + ') ' + 'td:nth-child(' + (move.x + 1) + ') ');
+            var placeEl = $('#game table.board tbody tr:nth-child(' + (move.y + 1) + ') ' + 'td:nth-child(' + (move.x + 1) + ') ');
             placeEl.append(newTile(move.tile));
             placeEl.find('.ui-droppable').removeClass('accept-tile-drop');
           }
