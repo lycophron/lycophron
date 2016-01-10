@@ -288,7 +288,7 @@ function loadGame(game, opts) {
 
           // record score
           var percentage;
-          var max = game.turns[this.turnId].score;
+          var max = game.turns[this.turnId].score || 0;
 
           if (max === 0) {
             percentage = 100;
@@ -356,13 +356,26 @@ function loadGame(game, opts) {
         // some UI related things that must be factored out
         $('.score-results').remove();
         var scoreEl = $('<div>', {class: 'score-results'});
-        scoreEl.append($('<span>', {html: ' U: ' + this.currentScore + ' '}));
-        scoreEl.append($('<span>', {html: ' M: ' + this.currentMaxScore + ' '}));
-        scoreEl.append($('<span>', {html: ' P: ' + this.percentage + '%'}));
         if (game.turns[this.turnId]) {
-          scoreEl.append($('<span>', {html: ' Max score for this round: ' + game.turns[this.turnId].score + ' '}));
+          scoreEl.append($('<div>', {html: ' Max score for this round: ' + game.turns[this.turnId].score + ' '}));
         }
-        buttonsEl.append(scoreEl);
+        // max this.currentMaxScore 100%
+        // move.score this.currentScore this.percentage
+        var tEl = $('<table>');
+        scoreEl.append(tEl);
+        tEl.append($('<thead>', {html: '<tr><th>User</th><th>Score</th><th>Sum</th><th>Diff</th><th>%</th></tr>'}));
+        var tbEl = $('<tbody>');
+        tEl.append(tbEl);
+
+        var trEl1 = $('<tr>', {html: '<td>' + 'Computer' + '</td>' + '<td>' + max + '</td>' + '<td>' + this.currentMaxScore + '</td>' + '<td>' + 0 + '</td>' + '<td>' + 100 + '%</td>'});
+        tEl.append(trEl1);
+
+        var diff = this.currentScore - this.currentMaxScore;
+        var score = move ? move.score : 0;
+        var trEl2 = $('<tr>', {html: '<td>' + 'User' + '</td>' + '<td>' + score + '</td>' + '<td>' + this.currentScore + '</td>' + '<td>' + diff + '</td>' + '<td>' + this.percentage + '%</td>'});
+        tEl.append(trEl2);
+
+        sidebarEl.append(scoreEl);
 
         // load next turn
         loadTurn(this.turnId);
@@ -385,6 +398,16 @@ function loadGame(game, opts) {
       var gameEl = $('#game');
       gameEl.children().remove();
 
+      var headerEl = $('#header');
+      headerEl.children().remove();
+
+      var pageheadEl = $('#pagehead');
+      pageheadEl.children().remove();
+
+      var sidebarEl = $('#sidebar');
+      sidebarEl.children().remove();
+
+
       // game information
       var infoEl = $('<div>', {class: 'info'});
       infoEl.append($('<span>', {html: game.language}));
@@ -395,7 +418,7 @@ function loadGame(game, opts) {
       infoEl.append($('<span>', {html: 'Bingos: ' + game.numBingos}));
       infoEl.append($('<span>', {html: 'Scoring: ' + game.scoring}));
 
-      gameEl.append(infoEl);
+      pageheadEl.append(infoEl);
 
       // board
       var boardEl = $('<table>', {class: 'board'});
@@ -460,25 +483,19 @@ function loadGame(game, opts) {
       gameEl.append(boardEl);
 
       // buttons
-      var buttonsEl = $('<div>', {class: 'buttons'});
-      gameEl.append(buttonsEl);
-
-      var clearEl = $('<button>', {html: 'Clear'});
-
-      clearEl.on('click', function () {
-        for (var i = 0; i < tilesOnRack.length; i += 1) {
-          rackEl.append(tilesOnRack[i]);
-          tilesOnRack[i].attr('data-x', -1);
-          tilesOnRack[i].attr('data-y', -1);
-        }
-      });
-
-      buttonsEl.append(clearEl);
+      // var buttonsEl = $('<div>', {class: 'buttons'});
+      // gameEl.append(buttonsEl);
 
       // rack
-      var rackEl = $('<div>', {class: 'rack tile-container accept-tile-drop ui-droppable'});
+      var rackEl = $('<div>', {class: 'rack'});
       var tilesOnRack = [];
-      rackEl.droppable({
+      var rackControlsEl1 = $('<div>', {class: 'controls'});
+      rackEl.append(rackControlsEl1);
+      var rackTileContainerEl = $('<div>', {class: 'tile-container accept-tile-drop ui-droppable'});
+      rackEl.append(rackTileContainerEl);
+      var rackControlsEl2 = $('<div>', {class: 'controls'});
+      rackEl.append(rackControlsEl2);
+      rackTileContainerEl.droppable({
         accept: function(el) {
           // TODO: do not accept if there is already one letter from the rack at the same position
           // return $(this).hasClass(TILE_CONSTANTS.acceptTileDropCSS);
@@ -504,6 +521,18 @@ function loadGame(game, opts) {
         hoverClass: 'hovered'
       });
       gameEl.append(rackEl);
+
+      var clearEl = $('<div>', {class: 'button', html: 'Clear'});
+
+      clearEl.on('click', function () {
+        for (var i = 0; i < tilesOnRack.length; i += 1) {
+          rackEl.append(tilesOnRack[i]);
+          tilesOnRack[i].attr('data-x', -1);
+          tilesOnRack[i].attr('data-y', -1);
+        }
+      });
+
+      rackControlsEl1.append(clearEl);
 
       function checkMove(tilesOnRack) {
         var tilesUsed = tilesOnRack.filter(function (tileEl) {
@@ -565,7 +594,7 @@ function loadGame(game, opts) {
 
       var solverResultEl = $('<div>', {class: 'solver-result'});
 
-      gameEl.append(solverResultEl);
+      sidebarEl.append(solverResultEl);
 
       if (opts.type === 'REVIEW') {
         // controls
@@ -578,7 +607,7 @@ function loadGame(game, opts) {
           var turn = game.turns[id] || {word: '', score: '', isBingo: ''};
           var el = $('<div>', {class: 'turn-description'});
           el.append($('<span>', {html: id + 1}));
-          var loadBtn = $('<button>', {html: 'Load'});
+          var loadBtn = $('<div>', {class: 'button', html: 'Load'});
           loadBtn.on('click', function () {
             loadTurn(id);
           });
@@ -589,22 +618,25 @@ function loadGame(game, opts) {
           return el;
         }
 
-        gameEl.append(controlsEl);
+        sidebarEl.append(controlsEl);
 
         loadTurn(0);
       } else if (opts.type === 'SINGLE_PLAYER') {
         var singlePlayer = new SinglePlayerGame();
         singlePlayer.start();
 
-        var okEl = $('<button>', {html: 'OK'});
+        var okEl = $('<div>', {class: 'button', html: 'OK'});
         okEl.on('click', function () {
           okEl.prop('disabled', true);
           singlePlayer.nextTurn();
+          // remove solver results
+          solverResultEl.children().remove();
+
           setTimeout(function () {
             okEl.prop('disabled', false);
-          }, 3000);
+          }, 1000);
         });
-        buttonsEl.append(okEl);
+        rackControlsEl2.append(okEl);
       } else if (opts.type === 'MULTIPLAYER_PLAYER') {
         console.log('Waiting for users ...');
         // TODO: add a new start button
@@ -647,7 +679,12 @@ function loadGame(game, opts) {
             tileEl.attr('data-y', -1);
             tilesOnRack.push(tileEl);
             rack.addTile(new L.Tile(tile.letter, tile.value));
-            rackEl.append(tileEl);
+            rackTileContainerEl.append(tileEl);
+          }
+
+          var solutions = solver.solve(rack);
+          if (game.turns[turnId].numSolutions !== solutions.length) {
+            console.log(game.turns[turnId].numSolutions, solutions.length, solutions[0]);
           }
         }
       }
