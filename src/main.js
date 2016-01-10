@@ -526,7 +526,7 @@ function loadGame(game, opts) {
 
       clearEl.on('click', function () {
         for (var i = 0; i < tilesOnRack.length; i += 1) {
-          rackEl.append(tilesOnRack[i]);
+          rackTileContainerEl.append(tilesOnRack[i]);
           tilesOnRack[i].attr('data-x', -1);
           tilesOnRack[i].attr('data-y', -1);
         }
