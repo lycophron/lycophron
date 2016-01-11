@@ -275,6 +275,8 @@ function loadGame(game, opts) {
       };
 
       SinglePlayerGame.prototype.nextTurn = function () {
+        savedMoves = [];
+        updateSavedMoves();
         if (this.turnId >= game.turns.length) {
           this.finish();
           return;
@@ -307,8 +309,10 @@ function loadGame(game, opts) {
             percentage: percentage
           });
 
+
+          var solutions = solver.solve(rack);
+
           if (move.score > 0) {
-            var solutions = solver.solve(rack);
             var found = false;
             for (var i = 0; i < solutions.length; i += 1) {
               if (solutions[i].score === move.score &&
@@ -376,6 +380,21 @@ function loadGame(game, opts) {
         tEl.append(trEl2);
 
         sidebarEl.append(scoreEl);
+
+
+        $('.solutions').remove();
+        if (solutions) {
+          var solutionsEl = $('<div>', {class: 'solutions'});
+          solutionsEl.append($('<div>', {html: 'Solutions from previous turn:'}));
+
+          for (var i = 0; i < solutions.length; i += 1) {
+            if (solutions[i].score > 0) {
+              solutionsEl.append($('<div>', {class: 'solution', html: solutions[i].word + ' ' + solutions[i].score}));
+            }
+          }
+
+          sidebarEl.append(solutionsEl);
+        }
 
         // load next turn
         loadTurn(this.turnId);
@@ -508,7 +527,7 @@ function loadGame(game, opts) {
           // clear x y for letterElement
           //self.clearLetterElementPosition(ui.draggable);
           var draggedTile = $(ui.draggable[0]);
-          rackEl.append(draggedTile);
+          rackTileContainerEl.append(draggedTile);
           draggedTile.css({top: '0', left: '0'});
           draggedTile.attr('data-x', -1);
           draggedTile.attr('data-y', -1);
@@ -533,6 +552,8 @@ function loadGame(game, opts) {
       });
 
       rackControlsEl1.append(clearEl);
+
+      var savedMoves = [];
 
       function checkMove(tilesOnRack) {
         var tilesUsed = tilesOnRack.filter(function (tileEl) {
@@ -589,7 +610,35 @@ function loadGame(game, opts) {
 
         // console.log(result);
 
+        if (result.success && result.validMove) {
+          var add = true;
+          for (var i = 0; i < savedMoves.length; i += 1) {
+            if (savedMoves[i].word === result.word &&
+              savedMoves[i].score === result.score &&
+              savedMoves[i].x === result.x &&
+              savedMoves[i].y === result.y) {
+
+                add = false;
+              }
+          }
+          if (add) {
+            savedMoves.push(result);
+            savedMoves.sort(function (a, b) { return a.score < b.score; });
+            updateSavedMoves();
+          }
+        }
+
         return result;
+      }
+
+      function updateSavedMoves() {
+        var savedMovesEl = $('.saved-moves');
+        savedMovesEl.children().remove();
+        savedMovesEl.append($('<div>', {html: 'Saved moves for this turn:'}));
+        for (var i = 0; i < savedMoves.length; i += 1) {
+          savedMovesEl.append($('<div>', {html: savedMoves[i].word + ' ' + savedMoves[i].score}));
+        }
+
       }
 
       var solverResultEl = $('<div>', {class: 'solver-result'});
@@ -637,6 +686,8 @@ function loadGame(game, opts) {
           }, 1000);
         });
         rackControlsEl2.append(okEl);
+
+        sidebarEl.append($('<div>', {class: 'saved-moves'}));
       } else if (opts.type === 'MULTIPLAYER_PLAYER') {
         console.log('Waiting for users ...');
         // TODO: add a new start button
