@@ -389,7 +389,7 @@ function loadGame(game, opts) {
 
           for (var i = 0; i < solutions.length; i += 1) {
             if (solutions[i].score > 0) {
-              solutionsEl.append($('<div>', {class: 'solution', html: solutions[i].word + ' ' + solutions[i].score}));
+              solutionsEl.append($('<div>', {class: 'solution', html: dictionary.decode(solutions[i].word) + ' ' + solutions[i].score}));
             }
           }
 
