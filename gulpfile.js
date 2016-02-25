@@ -29,7 +29,8 @@ var config = {
 		distAuth: './dist/auth/',
 
 		dist: './dist',
-		mainJs: './src/main.js'
+		mainJs: './src/main.js',
+		mainOpeningJs: './src/opening.js'
 	}
 }
 
@@ -61,6 +62,17 @@ gulp.task('js', function() {
 		.bundle()
 		.on('error', console.error.bind(console))
 		.pipe(source('bundle.js'))
+		.pipe(gulp.dest(config.paths.dist + '/scripts'))
+		.pipe(connect.reload());
+});
+
+gulp.task('opening-js', function() {
+	browserify(config.paths.mainOpeningJs)
+		// .transform(babelify)
+		.transform(reactify)
+		.bundle()
+		.on('error', console.error.bind(console))
+		.pipe(source('bundle-opening.js'))
 		.pipe(gulp.dest(config.paths.dist + '/scripts'))
 		.pipe(connect.reload());
 });
@@ -98,7 +110,7 @@ gulp.task('watch', function() {
 	gulp.watch(config.paths.css, ['css']);
 	gulp.watch(config.paths.html, ['html']);
 	gulp.watch(config.paths.json, ['json']);
-	gulp.watch(config.paths.js, ['update-version', 'js', /*'temp-js',*/ 'lint']);
+	gulp.watch(config.paths.js, ['update-version', 'js', 'opening-js', /*'temp-js',*/ 'lint']);
 	// gulp.watch(config.paths.copyFiles, ['copy-files']);
 	gulp.watch(config.paths.copyAuthFiles, ['copy-auth-files']);
 });
@@ -119,5 +131,5 @@ gulp.task('update-version',
     shell.task(['git log -1 --pretty=format:\'{%n  "commit": "%H",%n  "date": "%ad",%n  "message": "%s"%n}\'' +
     ' > version.json']));
 
-gulp.task('build', ['update-version', 'html', 'js', /*'temp-js', 'copy-files',*/ 'copy-auth-files', 'json', 'css', 'lint'])
+gulp.task('build', ['update-version', 'html', 'js', 'opening-js', /*'temp-js', 'copy-files',*/ 'copy-auth-files', 'json', 'css', 'lint'])
 gulp.task('default', ['build', 'open', 'watch']);

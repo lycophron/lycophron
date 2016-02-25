@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- <script>
+  document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+  ':35729/livereload.js?snipver=1"></' + 'script>')
+</script> -->
+<title>Lycophron - Opening</title>
+<!-- <link rel="stylesheet" href="css/bundle.css" /> -->
+<style>
+div {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  margin: 0;
+  font-size: 18px;
+  font-style: normal;
+  /*font-family: "Myriad Set Pro", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;*/
+  font-family: monospace;
+}
+.content {
+  padding: 1ex;
+}
+
+input {
+  width: calc(100% - 1ex);
+  font-size: 1.5em;
+  padding: 0.5ex;
+  font-family: monospace;
+}
+
+#problemId {
+  color: #AAA;
+}
+
+#vowels {
+  color: #777;
+}
+
+#consonants {
+  color: #777;
+}
+
+.message {
+  color: darkred;
+}
+
+#results {
+  padding: 1ex;
+  font-size: 1.2em;
+
+}
+</style>
+</head>
+<body>
+  <div class="content">
+    <input type="text" placeholder="Type letters here separated by spaces ..." autofocus/>
+
+    <div id="problemId"></div>
+    <div id="vowels"></div>
+    <div id="consonants"></div>
+
+    <div class="message">Loading page ...</div>
+
+    <div id="results">
+      Solutions will appear below after you hit enter in the text box.
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="scripts/bundle-opening.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-62498391-1', 'auto');
+  ga('send', 'pageview');
+
+  </script>
+</body>
+</html>
