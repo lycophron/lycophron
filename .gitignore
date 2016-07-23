@@ -9,6 +9,7 @@ bugs/**/*.json
 
 lib/Dictionary/info.json
 lib/Dictionary/*/*.json
+lib/Dictionary/*/*.csv
 
 salts.json
 users.json
