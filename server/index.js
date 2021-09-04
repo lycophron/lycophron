@@ -13,17 +13,17 @@ function start(config, done) {
         salts,
 
         winston = require('winston'),
-        logger = new (winston.Logger)({
+        logger = winston.createLogger({
             // TODO: add transport options to configuration
             transports: [
-                new (winston.transports.Console)({
+                new(winston.transports.Console)({
                     level: 'silly',
                     colorize: config.production === false,
                     timestamp: true,
                     prettyPrint: config.production === false,
                     exceptionHandling: true
                 }),
-                new (winston.transports.File)({
+                new(winston.transports.File)({
                     filename: 'server.log',
                     json: false
                 })
@@ -44,7 +44,7 @@ function start(config, done) {
             server;
 
         logger.info('Server is starting up ...');
-        logger.info('Version', {metadata: version});
+        logger.info('Version', { metadata: version });
 
         config.sessionParameters.secret = salts.sessionSecret;
 
@@ -57,7 +57,7 @@ function start(config, done) {
         // app.set('trust proxy', 'loopback');
 
         app.use(cookieParser());
-        app.use(compression({threshold: 512}));
+        app.use(compression({ threshold: 512 }));
         app.use(bodyParser.json()); // for parsing application/json
         app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
@@ -66,7 +66,7 @@ function start(config, done) {
         //    next();
         //});
 
-        app.get('/favicon.ico', function (req, res, next) {
+        app.get('/favicon.ico', function(req, res, next) {
             res.writeHead(200);
             res.end();
         });
@@ -85,7 +85,7 @@ function start(config, done) {
         // app.use('/libs/', express.static(__dirname + '/../build/libs/'));
 
         logger.debug('Adding static file rules for /locales\/.+\/translation.json/ no auth is required');
-        app.use(/^\/locales\/.+\/translation.json$/, function (req, res, next) {
+        app.use(/^\/locales\/.+\/translation.json$/, function(req, res, next) {
             res.sendFile(path.normalize(path.join(__dirname, '..', 'dist', req.baseUrl)));
         });
 
@@ -100,7 +100,7 @@ function start(config, done) {
         //mongoose.connection.once('open', function (err) {
         //console.log('Connected to db');
         logger.debug('Binding to ' + config.server.port);
-        server = app.listen(config.server.port, function (err) {
+        server = app.listen(config.server.port, function(err) {
 
             logger.debug('Adding web sockets ... ', server.address().port);
             websockets.init(server, logger, config);
@@ -115,14 +115,14 @@ function start(config, done) {
     // getting random secret keys
     try {
         logger.info('Trying to read salts.json ...');
-        salts = JSON.parse(fs.readFileSync('salts.json', {encoding: 'utf-8'}));
+        salts = JSON.parse(fs.readFileSync('salts.json', { encoding: 'utf-8' }));
         logger.info('Got salts.json content.');
         saltsReady();
     } catch (e) {
         if (e.errno && e.code === 'ENOENT') {
-            require('crypto').randomBytes(48, function (ex, buf) {
-                salts = {sessionSecret: buf.toString('hex')};
-                fs.writeFileSync('salts.json', JSON.stringify(salts), {encoding: 'utf-8'});
+            require('crypto').randomBytes(48, function(ex, buf) {
+                salts = { sessionSecret: buf.toString('hex') };
+                fs.writeFileSync('salts.json', JSON.stringify(salts), { encoding: 'utf-8' });
                 logger.info('Created salts.json');
                 saltsReady();
             });
@@ -148,7 +148,7 @@ module.exports = {
 
 if (require.main === module) {
     var configuration = require('../config');
-    start(configuration, function (err) {
+    start(configuration, function(err) {
         'use strict';
         if (err) {
             throw err;
